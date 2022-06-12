@@ -8,15 +8,13 @@ services:
       MONGO_URL: mongodb://localmongo:27017
       SERVICE_NAME: ${SERVICE_NAME}
       LOG_LEVEL: ${LOG_LEVEL}
-      TZ: Asia/Kolkata
+      TZ: UTC
       MONGO_DATABASENAME: ${MONGO_DATABASENAME}
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_PORT: ${EMAIL_PORT}
       EMAIL_USERNAME: ${EMAIL_USERNAME}
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
       PRICE_TACKER_URL: ${PRICE_TACKER_URL}
-
-    command: tail -f /dev/null
     depends_on:
       - localmongo
     ports:

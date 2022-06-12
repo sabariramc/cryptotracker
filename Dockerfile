@@ -8,7 +8,7 @@ COPY go.mod .
 RUN go mod download
 
 COPY . .
-WORKDIR /myapp/src
+WORKDIR /myapp/src/cmd/server
 RUN go build -o /app 
 
 
