@@ -2,11 +2,14 @@ package app
 
 import (
 	"context"
+	"cryptotracker/src/model"
 )
 
 type EmailMessage struct {
-	CurrentPrice *Price
-	Message      string
+	Message  string
+	Coin     string
+	Currency string
+	Price    model.CryptoPrice
 }
 
 type EmailNotifier interface {

@@ -12,6 +12,11 @@ func (bt *CryptoTacker) Routes() *baseapp.APIRoute {
 			http.MethodGet: {
 				Func: bt.Health,
 			},
-		}}}
+		}},
+		"/api/prices/{coin}": &baseapp.APIResource{
+			Handlers: map[string]*baseapp.APIHandler{
+				http.MethodGet: {
+					Func: bt.GetPrice(),
+				},
+			}}}
 }
-

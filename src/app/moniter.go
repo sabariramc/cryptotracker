@@ -2,12 +2,13 @@ package app
 
 import (
 	"context"
-	constant "cryptotracker/src/constants"
+	"cryptotracker/src/constant"
+	"cryptotracker/src/model"
 	"fmt"
 	"time"
 )
 
-func (ct *CryptoTacker) Moniter(ctx context.Context, symbol string, ch chan *Price) {
+func (ct *CryptoTacker) Moniter(ctx context.Context, symbol string, ch chan *model.CryptoPrice) {
 	defer close(ch)
 	tctx, _ := context.WithTimeout(ctx, time.Second*time.Duration(ct.c.Moniter.PeriodInSeconds))
 	for {

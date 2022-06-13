@@ -5,7 +5,8 @@ import (
 	"sync"
 
 	"cryptotracker/src/config"
-	constant "cryptotracker/src/constants"
+	"cryptotracker/src/constant"
+	"cryptotracker/src/model"
 
 	"github.com/sabariramc/goserverbase/baseapp"
 	"github.com/sabariramc/goserverbase/db/mongo"
@@ -61,7 +62,7 @@ func GetApp(c *config.MasterConfig, lMux log.LogMultipluxer, auditLog log.AuditL
 func (ct *CryptoTacker) StartJob(ctx context.Context) {
 	var wg sync.WaitGroup
 	defer wg.Wait()
-	ch := make(chan *Price, 10)
+	ch := make(chan *model.CryptoPrice, 10)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()

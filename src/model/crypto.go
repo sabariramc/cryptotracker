@@ -17,9 +17,10 @@ type CryptoPrice struct {
 
 type CryptoTracker struct {
 	mongo.BaseMongoModel `bson:",inline"`
-	Coin                 string        `json:"coin" bson:"coin"`
-	Date                 time.Time     `json:"date" bson:"date"`
-	PriceHistory         []CryptoPrice `json:"priceHistory" bson:"priceHistory"`
+	Coin                 string         `json:"coin" bson:"coin"`
+	Date                 time.Time      `json:"date" bson:"date"`
+	Currency             string         `json:"currency" bson:"currency"`
+	PriceHistory         []*CryptoPrice `json:"priceHistory" bson:"priceHistory"`
 }
 
 func (ct *CryptoTracker) Create(ctx context.Context, db *mongo.Mongo) error {

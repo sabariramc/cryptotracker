@@ -13,16 +13,8 @@ import (
 
 	"github.com/gorilla/schema"
 	"github.com/sabariramc/goserverbase/baseapp"
-	"github.com/shopspring/decimal"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-type Price struct {
-	Timestamp time.Time
-	Price     decimal.Decimal
-	Coin      string
-	Currency  string
-}
 
 var timeConverter = func(value string) reflect.Value {
 	if v, err := time.Parse("22-12-2006", value); err == nil {
@@ -32,8 +24,8 @@ var timeConverter = func(value string) reflect.Value {
 }
 
 type PriceTracker interface {
-	GetCurrentPrice(ctx context.Context, coin, currency string) (*Price, error)
-	GetPrice(ctx context.Context, coin, currency string, fromDate, toDate time.Time) ([]*Price, error)
+	GetCurrentPrice(ctx context.Context, coin, currency string) (*model.CryptoPrice, error)
+	GetPrice(ctx context.Context, coin, currency string, fromDate, toDate time.Time) ([]*model.CryptoPrice, error)
 }
 
 func (ct *CryptoTacker) GetPrice() http.HandlerFunc {
@@ -60,12 +52,23 @@ func (ct *CryptoTacker) GetPrice() http.HandlerFunc {
 			err = v.Get(ctx, ct.db, coin, qp.Date)
 			if err != nil {
 				if errors.Is(err, mongo.ErrNoDocuments) {
-					ct.priceTrackerClient.GetPrice(ctx, coin, constant.USD, qp.Date, qp.Date.Add(time.Hour*24))
+					data, err := ct.priceTrackerClient.GetPrice(ctx, coin, constant.USD, qp.Date, qp.Date.Add(time.Hour*24))
+					if err != nil {
+						return http.StatusBadGateway, nil, fmt.Errorf("CryptoTacker.GetPrice : %w", err)
+					}
+					v.PriceHistory = data
+					v.Coin = coin
+					v.Currency = constant.USD
+					err = v.Create(ctx, ct.db)
+					if err != nil {
+						return http.StatusInternalServerError, nil, fmt.Errorf("CryptoTacker.GetPrice : %w", err)
+					}
 				} else {
 					return http.StatusInternalServerError, nil, fmt.Errorf("CryptoTacker.GetPrice : %w", err)
 				}
 			}
-			return http.StatusOK, nil, nil
+			res := &dto.PriceHistoryResponseDTO{}
+			return http.StatusOK, res, nil
 		}
 	})
 }
