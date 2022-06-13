@@ -13,6 +13,7 @@ import (
 
 	"github.com/gorilla/schema"
 	"github.com/sabariramc/goserverbase/baseapp"
+	"github.com/sabariramc/goserverbase/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -68,6 +69,26 @@ func (ct *CryptoTacker) GetPrice() http.HandlerFunc {
 				}
 			}
 			res := &dto.PriceHistoryResponseDTO{}
+			n := len(v.PriceHistory)
+			res.Count = n
+			res.URL = fmt.Sprintf("<http://%v/api/prices/btc?date=%v&offset=%v&limit=%v>", ct.GetPort(), qp.Date.Format("21-12-2021"), qp.Offset, qp.Limit)
+			if qp.Offset > n {
+				res.NextURL = ""
+				res.Data = make([]*dto.PriceResponseDTO, 0)
+			} else {
+				res.NextURL = fmt.Sprintf("<http://%v/api/prices/btc?date=%v&offset=%v&limit=%v>", ct.GetPort(), qp.Date.Format("21-12-2021"), qp.Offset+qp.Limit, qp.Limit)
+				resCount := n - qp.Offset
+				if resCount > qp.Limit {
+					resCount = qp.Limit
+				}
+				res.Data = make([]*dto.PriceResponseDTO, resCount)
+				for i, j := qp.Offset, 0; i < qp.Offset+resCount; i, j = i+1, j+1 {
+					resPart := &dto.PriceResponseDTO{}
+					utils.JsonTransformer(v.PriceHistory[i], resPart)
+					res.Data[j] = resPart
+				}
+			}
+
 			return http.StatusOK, res, nil
 		}
 	})
