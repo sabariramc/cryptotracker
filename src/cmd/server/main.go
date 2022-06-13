@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"sync"
 
-	"thinklink/src/app"
+	"cryptotracker/src/app"
 )
 
 func main() {
@@ -21,8 +21,7 @@ func main() {
 	defer cancel()
 	go func() {
 		defer wg.Done()
-		s.Moniter(ctx)
+		s.StartJob(ctx)
 	}()
 	log.Fatal(http.ListenAndServe(s.GetPort(), s))
-
 }

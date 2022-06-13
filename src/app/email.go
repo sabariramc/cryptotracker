@@ -10,5 +10,5 @@ type EmailMessage struct {
 }
 
 type EmailNotifier interface {
-	Send(ctx context.Context, to string, currency string) error
+	Send(ctx context.Context, to string, message *EmailMessage) error
 }

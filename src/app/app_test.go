@@ -1,10 +1,10 @@
 package app_test
 
 import (
+	"cryptotracker/src/app"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"thinklink/src/app"
 
 	"github.com/sabariramc/goserverbase/utils"
 	"gotest.tools/assert"

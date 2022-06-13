@@ -2,8 +2,10 @@ package app
 
 import (
 	"context"
+	"sync"
 
-	"thinklink/src/config"
+	"cryptotracker/src/config"
+	constant "cryptotracker/src/constants"
 
 	"github.com/sabariramc/goserverbase/baseapp"
 	"github.com/sabariramc/goserverbase/db/mongo"
@@ -11,14 +13,16 @@ import (
 	"github.com/sabariramc/goserverbase/log/logwriter"
 )
 
-type BitCoinTacker struct {
+type CryptoTacker struct {
 	*baseapp.BaseApp
-	db                 *mongo.Mongo
-	log                *log.Logger
-	priceTrackerClient PriceTracker
+	db                  *mongo.Mongo
+	log                 *log.Logger
+	priceTrackerClient  PriceTracker
+	emailNotifierClient EmailNotifier
+	c                   *config.MasterConfig
 }
 
-func GetDefaultApp() (*BitCoinTacker, error) {
+func GetDefaultApp() (*CryptoTacker, error) {
 	c := config.NewConfig()
 	hostParams := &log.HostParams{
 		Host:        c.App.Host,
@@ -27,16 +31,18 @@ func GetDefaultApp() (*BitCoinTacker, error) {
 	}
 	consoleLogger := logwriter.NewConsoleWriter(*hostParams)
 	lmux := log.NewSequenctialLogMultipluxer(consoleLogger)
-	return GetApp(c, lmux, consoleLogger, nil)
+	return GetApp(c, lmux, consoleLogger, nil, nil)
 }
 
-func GetApp(c *config.MasterConfig, lMux log.LogMultipluxer, auditLog log.AuditLogWriter, priceTrackerClient PriceTracker) (*BitCoinTacker, error) {
-	r := &BitCoinTacker{
+func GetApp(c *config.MasterConfig, lMux log.LogMultipluxer, auditLog log.AuditLogWriter, priceTrackerClient PriceTracker, emailNotifierClient EmailNotifier) (*CryptoTacker, error) {
+	r := &CryptoTacker{
 		BaseApp: baseapp.NewBaseApp(baseapp.ServerConfig{
 			LoggerConfig: c.Logger,
 			AppConfig:    c.App,
 		}, lMux, auditLog),
-		priceTrackerClient: priceTrackerClient,
+		c:                   c,
+		priceTrackerClient:  priceTrackerClient,
+		emailNotifierClient: emailNotifierClient,
 	}
 	ctx := r.GetCorrelationContext(context.Background(), log.GetDefaultCorrelationParams(c.App.ServiceName))
 	r.log = r.GetLogger()
@@ -52,6 +58,18 @@ func GetApp(c *config.MasterConfig, lMux log.LogMultipluxer, auditLog log.AuditL
 	return r, nil
 }
 
-func (bt *BitCoinTacker) StartCron(ctx context.Context) {
-
+func (ct *CryptoTacker) StartJob(ctx context.Context) {
+	var wg sync.WaitGroup
+	defer wg.Wait()
+	ch := make(chan *Price, 10)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ct.Notifier(ctx, ch)
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ct.Moniter(ctx, constant.BITCOIN, ch)
+	}()
 }

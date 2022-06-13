@@ -6,7 +6,7 @@ import (
 	"github.com/sabariramc/goserverbase/baseapp"
 )
 
-func (bt *BitCoinTacker) Routes() *baseapp.APIRoute {
+func (bt *CryptoTacker) Routes() *baseapp.APIRoute {
 	return &baseapp.APIRoute{"/health": &baseapp.APIResource{
 		Handlers: map[string]*baseapp.APIHandler{
 			http.MethodGet: {
@@ -14,3 +14,4 @@ func (bt *BitCoinTacker) Routes() *baseapp.APIRoute {
 			},
 		}}}
 }
+
