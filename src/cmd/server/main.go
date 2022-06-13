@@ -1,10 +1,8 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
-	"sync"
 
 	"cryptotracker/src/app"
 )
@@ -14,14 +12,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	var wg sync.WaitGroup
-	wg.Add(1)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer wg.Wait()
-	defer cancel()
-	go func() {
-		defer wg.Done()
-		s.StartJob(ctx)
-	}()
+	// var wg sync.WaitGroup
+	// wg.Add(1)
+	// ctx, cancel := context.WithCancel(context.Background())
+	// defer wg.Wait()
+	// defer cancel()
+	// go func() {
+	// 	defer wg.Done()
+	// 	// s.StartJob(ctx)
+	// }()
 	log.Fatal(http.ListenAndServe(s.GetPort(), s))
 }
